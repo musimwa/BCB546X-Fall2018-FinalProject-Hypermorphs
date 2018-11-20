@@ -1,0 +1,81 @@
+---
+title: "Chen_Fusarium"
+author: "Hypermorphs"
+date: "November 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# R/QTL mapping 
+
+# tutorial used for R/QTL mapping:  http://www.rqtl.org/rqtltour.pdf
+
+
+```{r}
+
+if (!require("qtl")) install.packages("qtl")
+library(qtl)                                   #Load the R/qtl library
+
+POP <- read.cross("csv", ".", "ChenPop1.csv")  # read in phenotype & genotype data file
+
+POP <- jittermap(POP)              # jitters marker position slightly so no two markers on top of each other
+
+summary(POP)                                   # provide information about dataset
+
+
+
+```
+
+
+
+
+
+```{r}
+
+plotMissing(POP)  # examine pattern of missing data
+
+
+```
+```{r}
+gt <- geno.table(POP)  
+gt[gt$P.value < 0.05/totmar(POP),]  # QC data by checking alleles for each marker
+
+
+```
+
+*** QTL mapping ***
+- uses hidden Markov model (HMM) for QTL genotype probability calculation
+
+
+```{r}
+
+POP <- calc.genoprob(POP, step=1, error.prob=0.01)  # step size set to 1cM
+
+out.hk <- scanone(POP, method="hk")   # single QTL genome scan with Haley-Knott regression
+
+summary(out.hk, threshold=3)          # displays maximum LOD score for each chromosome, with a min of LOD 3.0
+
+operm.hk <- scanone(POP, method="hk", n.perm=1000)  # permutation to determine LOD threshold
+summary(operm.hk, alpha=0.05)                       # LOD threshold output
+
+
+plot(out.hk)                                        # Plot QTL
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+```
+
+
+
